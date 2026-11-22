@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entrena en casa</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3ee;--ink:#12332b;--mut:#5a7068;--card:#fff;--acc:#ff5a4e;--acc2:#ffd23f;--line:#d3ded6;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1f1a;--ink:#e8f2ec;--mut:#9ab3a8;--card:#173028;--line:#2a4a40;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1f1a;--ink:#e8f2ec;--mut:#9ab3a8;--card:#173028;--line:#2a4a40;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.45 Barlow,system-ui,sans-serif;max-width:560px;margin:0 auto;padding:16px 16px 90px}
+h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;font-weight:800;margin:0;line-height:1}
+h1{font-size:44px}h2{font-size:28px;margin:22px 0 10px}
+.mut{color:var(--mut)}
+.seg{display:flex;gap:6px;margin:12px 0}
+.seg button{flex:1;padding:10px 4px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:600 15px Barlow,sans-serif}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g{border:0;border-radius:14px;padding:16px 12px;text-align:left;color:#fff;font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:26px;min-height:92px;display:flex;flex-direction:column;justify-content:space-between}
+.g small{font:400 14px Barlow,sans-serif;opacity:.9}
+.plan{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.d{aspect-ratio:1;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:800 18px "Barlow Condensed",sans-serif;position:relative}
+.d.done{background:var(--acc);border-color:var(--acc);color:#fff}
+.d.rest{opacity:.45}
+.stats{display:flex;gap:10px}
+.st{flex:1;background:var(--card);border-radius:14px;padding:12px}
+.st b{font:800 34px "Barlow Condensed",sans-serif;display:block}
+.top{display:flex;justify-content:space-between;align-items:center}
+.ic{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 12px;font:600 15px Barlow,sans-serif}
+#play{position:fixed;inset:0;background:var(--bg);padding:calc(16px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));display:none;flex-direction:column;max-width:560px;margin:0 auto;overflow-y:auto}
+#play.show{display:flex}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.phase{font:800 22px "Barlow Condensed",sans-serif;color:var(--acc)}
+.name{font-size:46px;margin:6px 0 8px}
+.how{color:var(--mut);font-size:18px}
+.time{font:800 96px/1 "Barlow Condensed",sans-serif;text-align:center;margin:auto 0}
+.fig{width:100%;max-height:210px;margin:10px 0;color:var(--ink)}
+.ctl{display:flex;gap:10px}
+.ctl button{flex:1;padding:16px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:800 20px "Barlow Condensed",sans-serif}
+.ctl .main{background:var(--acc);border-color:var(--acc);color:#fff}
+:focus-visible{outline:3px solid var(--acc2);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div id="home">
+  <div class="top"><h1>Entrena<br>en casa</h1><button class="ic" id="voz">Voz: sí</button></div>
+  <p style="font:600 20px/1.3 Barlow,sans-serif;margin:12px 0 6px">¡A entrenar, manco! Que subir a Soberano no da músculos 💪</p>
+  <p class="mut">Sin equipo y sin pagar. Elige tu nivel y un grupo muscular.</p>
+  <div class="seg" id="niveles"></div>
+  <div class="grid" id="grupos"></div>
+  <h2>Plan de 4 semanas</h2>
+  <p class="mut" style="margin-top:-4px">Toca un día para hacerlo. Los días tenues son de descanso.</p>
+  <div class="plan" id="plan"></div>
+  <h2>Tu progreso</h2>
+  <div class="stats"><div class="st"><b id="sTot">0</b>entrenamientos</div><div class="st"><b id="sRacha">0</b>días seguidos</div><div class="st"><b id="sMin">0</b>minutos</div></div>
+  <p class="mut" id="nota">Si algo te duele, para. Calienta antes y bebe agua.</p>
+</div>
+<div id="play" role="dialog" aria-label="Entrenamiento">
+  <div class="top"><span class="mut" id="cuenta"></span><button class="ic" id="salir">Salir</button></div>
+  <div class="bar"><i id="barra"></i></div>
+  <div class="phase" id="fase"></div>
+  <h2 class="name" id="nombre"></h2>
+  <div class="how" id="como"></div>
+  <svg id="fig" class="fig" viewBox="0 0 120 80" role="img" aria-label="Dibujo del ejercicio"></svg>
+  <div class="time" id="tiempo">0</div>
+  <div class="ctl"><button id="pausa" class="main">Pausa</button><button id="salta">Saltar</button></div>
+</div>
+<script>
+var G=[
+{k:"cuerpo",n:"Todo el cuerpo",c:"#ff5a4e",e:[["Saltos de tijera","De pie, salta abriendo piernas y brazos a la vez."],["Sentadillas","Pies al ancho de hombros, baja la cadera hacia atrás, espalda recta."],["Flexiones","Cuerpo recto como tabla. Si es difícil, apoya las rodillas."],["Zancadas","Da un paso largo y baja hasta que ambas rodillas formen 90°. Alterna."],["Escaladores","En posición de plancha, lleva las rodillas al pecho rápido, una y otra."],["Plancha","Apoya antebrazos y puntas. Aprieta abdomen, no subas la cadera."]]},
+{k:"abs",n:"Abdominales",c:"#2b7bd9",e:[["Crunches","Acostado, rodillas dobladas. Sube los hombros sin jalar el cuello."],["Elevación de piernas","Acostado, sube las piernas rectas y baja sin tocar el suelo."],["Bicicleta","Lleva un codo a la rodilla contraria, alternando lento."],["Plancha lateral","De lado sobre un antebrazo, cuerpo recto. Cambia de lado a la mitad."],["Tijeras","Acostado, piernas elevadas, cruza una sobre otra alternando."],["Plancha","Apoya antebrazos y puntas. Aprieta abdomen."]]},
+{k:"pecho",n:"Pecho",c:"#8a4fd6",e:[["Flexiones con rodillas","Rodillas apoyadas, baja el pecho al suelo y sube."],["Flexiones","Cuerpo recto, codos a 45° del tronco."],["Flexiones anchas","Manos más abiertas que los hombros."],["Flexiones diamante","Manos juntas bajo el pecho formando un rombo."],["Flexiones inclinadas","Manos en una silla firme o el sofá, cuerpo en diagonal."],["Plancha con toque","En plancha alta, toca un hombro con la mano contraria. Alterna."]]},
+{k:"brazos",n:"Brazos",c:"#e8931a",e:[["Fondos en silla","Manos en el borde de una silla firme, baja doblando los codos hacia atrás."],["Flexiones diamante","Manos juntas, codos pegados al cuerpo."],["Plancha a flexión","De plancha de antebrazos a plancha alta, alternando el brazo que sube."],["Círculos de brazos","Brazos abiertos, haz círculos pequeños. A mitad, cambia de sentido."],["Toque de hombro","En plancha alta, toca un hombro con la mano contraria."],["Flexiones con rodillas","Rodillas apoyadas, codos cerca del cuerpo."]]},
+{k:"piernas",n:"Piernas",c:"#1e9e6a",e:[["Sentadillas","Pies al ancho de hombros, baja la cadera hacia atrás."],["Zancadas","Paso largo, baja controlado. Alterna las piernas."],["Puente de glúteos","Acostado, rodillas dobladas, sube la cadera y aprieta glúteos."],["Sentadilla sumo","Pies muy abiertos, puntas afuera, baja recto."],["Elevación de talones","De pie, sube en puntas y baja lento. Apóyate en la pared."],["Sentadilla con salto","Baja y salta explosivo. Cae suave, rodillas flexionadas."]]},
+{k:"espalda",n:"Espalda",c:"#c93a7a",e:[["Superman","Boca abajo, sube brazos y piernas a la vez y sostén."],["Nadador","Boca abajo, sube brazo y pierna contrarios alternando."],["Perro y pájaro","En cuatro apoyos, estira brazo y pierna contrarios. Alterna."],["Cobra","Boca abajo, manos bajo los hombros, sube el pecho suave."],["Puente de glúteos","Acostado, sube la cadera y aprieta glúteos y espalda baja."],["Extensión lumbar","Boca abajo, manos en la nuca, sube el pecho sin forzar."]]},
+{k:"pared",n:"Pared",c:"#5b6b7a",e:[["Sentadilla en la pared","Espalda pegada a la pared, baja hasta 90° y aguanta sin moverte."],["Flexiones de pared","De pie frente a la pared, manos a la altura del pecho. Acerca el pecho y empuja."],["Ángeles en la pared","Espalda, codos y manos pegados a la pared. Sube y baja los brazos lento."],["Elevación de talones","De pie, apoyado en la pared: sube en puntas y baja lento."],["Rodillas al pecho","Apoyado en la pared, sube una rodilla a la vez, alternando."]]}];
+var NIV=[{n:"Principiante",w:25,r:20,v:1},{n:"Intermedio",w:35,r:15,v:2},{n:"Avanzado",w:45,r:10,v:3}];
+var S={nivel:0,voz:true,hechos:[],log:[]};
+try{var x=JSON.parse(localStorage.getItem("entrena")||"null");if(x)S=Object.assign(S,x)}catch(e){}
+function save(){try{localStorage.setItem("entrena",JSON.stringify(S))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function hoy(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function dia(s){var p=s.split("-");return Date.UTC(+p[0],+p[1]-1,+p[2])/864e5}
+function draw(){
+  $("voz").textContent="Voz: "+(S.voz?"sí":"no");
+  $("niveles").innerHTML=NIV.map(function(n,i){return '<button class="'+(i==S.nivel?"on":"")+'" data-n="'+i+'">'+n.n+'</button>'}).join("");
+  $("grupos").innerHTML=G.map(function(g,i){return '<button class="g" style="background:'+g.c+'" data-g="'+i+'">'+g.n+'<small>'+g.e.length+' ejercicios · '+Math.round(g.e.length*(NIV[S.nivel].w+NIV[S.nivel].r)/60)+' min</small></button>'}).join("");
+  var p="";for(var i=0;i<28;i++){var rest=i%7==6;p+='<button class="d'+(S.hechos.indexOf(i)>-1?" done":"")+(rest?" rest":"")+'" data-d="'+i+'" aria-label="Día '+(i+1)+(rest?", descanso":"")+'">'+(i+1)+'</button>'}
+  $("plan").innerHTML=p;
+  var f=S.log.map(function(l){return l.f}),u=f.filter(function(v,i){return f.indexOf(v)==i}).map(dia).sort(function(a,b){return b-a});
+  var r=0,t=dia(hoy());if(u[0]==t||u[0]==t-1){r=1;for(var j=1;j<u.length;j++){if(u[j]==u[j-1]-1)r++;else break}}
+  $("sTot").textContent=S.log.length;$("sRacha").textContent=r;
+  $("sMin").textContent=Math.round(S.log.reduce(function(a,l){return a+l.m},0));
+}
+$("niveles").onclick=function(e){var n=e.target.dataset.n;if(n!=null){S.nivel=+n;save();draw()}};
+$("voz").onclick=function(){S.voz=!S.voz;save();draw()};
+$("grupos").onclick=function(e){var b=e.target.closest("[data-g]");if(b)start(+b.dataset.g,null)};
+$("plan").onclick=function(e){var b=e.target.closest("[data-d]");if(!b)return;var d=+b.dataset.d;if(d%7==6){alert("Hoy toca descansar. Camina un poco y estírate.");return}start(d%6,d)};
+var ST=[[[60,12],["60,18 60,42","60,42 56,72","60,42 64,72","60,22 54,34 52,44","60,22 66,34 68,44"]]];
+var P={
+ wall:[[[34,14],["26,4 26,74","34,20 34,44","34,44 34,72","34,24 44,34"]],[[34,26],["26,4 26,74","34,32 34,56","34,56 62,56 62,72","34,36 48,44"]]],
+ jack:[ST[0],[[60,12],["60,18 60,42","60,42 46,72","60,42 74,72","60,22 46,10","60,22 74,10"]]],
+ squat:[ST[0],[[54,20],["54,26 40,50","40,50 66,52 60,72","54,28 76,32"]]],
+ lunge:[ST[0],[[56,16],["56,22 56,44","56,44 74,50 74,72","56,44 40,64 32,72","56,26 50,38"]]],
+ pushup:[[[20,40],["28,44 100,68","28,44 28,70"]],[[20,58],["28,62 100,70","28,62 38,66 28,70"]]],
+ plank:[[[22,46],["30,50 100,68","30,50 30,70 46,70"]],[[22,48],["30,52 100,70","30,52 30,70 46,70"]]],
+ climber:[[[20,40],["28,44 100,68","28,44 28,70"]],[[20,40],["28,44 100,68","28,44 28,70","80,62 54,54 58,66"]]],
+ crunch:[[[22,66],["28,68 62,68","62,68 78,52 90,68"]],[[34,52],["40,58 62,68","62,68 78,52 90,68","40,58 52,52"]]],
+ legraise:[[[18,66],["24,68 60,68 104,68"]],[[18,66],["24,68 60,68","60,68 60,26"]]],
+ bridge:[[[18,66],["24,68 60,68","60,68 76,50 84,68"]],[[18,66],["24,68 58,48","58,48 78,50 84,68"]]],
+ super:[[[18,64],["24,66 100,66","24,66 8,68","100,66 112,68"]],[[14,56],["24,66 100,66","24,66 8,54","100,66 112,54"]]],
+ bird:[[[30,34],["36,40 80,40","36,40 36,70","80,40 80,52 82,70"]],[[30,34],["36,40 80,40","40,42 14,38","80,40 110,44","36,42 36,70","76,42 76,70"]]],
+ calf:[ST[0],[[60,8],["60,14 60,38","60,38 56,68","60,38 64,68","60,18 54,30 52,40","60,18 66,30 68,40"]]],
+ dips:[[[56,16],["56,22 56,46","56,22 48,40","56,46 82,50 90,72"]],[[56,28],["56,34 56,58","56,34 52,46 46,40","56,58 82,58 90,72"]]],
+ arms:[[[60,12],["60,18 60,42","60,42 56,72","60,42 64,72","60,22 40,22","60,22 80,22"]],[[60,12],["60,18 60,42","60,42 56,72","60,42 64,72","60,22 44,32","60,22 76,32"]]]
+};
+var RX=[[/pared/,"wall"],[/fondos/,"dips"],[/escalador/,"climber"],[/c[ií]rculos/,"arms"],[/salto.*tijera/,"jack"],[/elevaci[oó]n de piernas|^tijeras/,"legraise"],[/crunch|bicicleta/,"crunch"],[/puente/,"bridge"],[/superman|nadador|cobra|lumbar/,"super"],[/perro/,"bird"],[/zancada/,"lunge"],[/talones/,"calf"],[/sentadilla/,"squat"],[/^plancha( lateral)?$/,"plank"],[/flexi|toque|plancha/,"pushup"]];
+function mk(o){return '<circle cx="'+o[0][0]+'" cy="'+o[0][1]+'" r="5.5" fill="currentColor"/>'+o[1].map(function(l){return '<polyline points="'+l+'" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'}).join("")}
+var FT=null,FK=null,GR='<line x1="4" y1="74" x2="116" y2="74" stroke="var(--line)" stroke-width="3" stroke-linecap="round"/>';
+function fig(n){
+  var k="pushup";for(var i=0;i<RX.length;i++){if(RX[i][0].test(n.toLowerCase())){k=RX[i][1];break}}
+  if(k==FK&&FT)return;FK=k;clearInterval(FT);
+  var f=0,s=$("fig");function d(){s.innerHTML=GR+mk(P[k][f]);f=1-f}
+  d();FT=setInterval(function(){if(!W){clearInterval(FT);FK=null;return}d()},700);
+}
+var W=null,T=null;
+function say(t){if(!S.voz||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="es-419";speechSynthesis.speak(u)}catch(e){}}
+function start(g,d){
+  var n=NIV[S.nivel],ex=[];
+  G[g].e.forEach(function(e){ex.push(e)});
+  W={g:g,d:d,ex:ex,i:0,ph:"w",t:n.w,pause:false,ini:Date.now()};
+  $("play").className="show";show();say("Empezamos. "+ex[0][0]);
+  clearInterval(T);T=setInterval(tick,1000);
+}
+function show(){
+  var n=NIV[S.nivel],e=W.ex[W.i],w=W.ph=="w";
+  $("cuenta").textContent=(W.i+1)+" de "+W.ex.length+" · "+G[W.g].n;
+  $("fase").textContent=w?"Hazlo":"Descansa";
+  var sig=w?e:W.ex[W.i+1]||e;
+  $("nombre").textContent=w?e[0]:"Sigue: "+sig[0];
+  $("como").textContent=sig[1];fig(sig[0]);
+  $("tiempo").textContent=W.t;
+  $("barra").style.width=((W.i+(w?0:1))/W.ex.length*100)+"%";
+}
+function next(){
+  var n=NIV[S.nivel];
+  if(W.ph=="w"){
+    if(W.i==W.ex.length-1){fin();return}
+    W.ph="r";W.t=n.r;say("Descansa. Sigue "+W.ex[W.i+1][0]);
+  }else{W.i++;W.ph="w";W.t=n.w;say(W.ex[W.i][0])}
+  show();
+}
+function tick(){
+  if(!W||W.pause)return;
+  W.t--;$("tiempo").textContent=W.t;
+  if(W.t==3||W.t==2||W.t==1)say(String(W.t));
+  if(W.t<=0)next();
+}
+function fin(){
+  clearInterval(T);var m=Math.max(1,Math.round((Date.now()-W.ini)/6e4));
+  S.log.push({f:hoy(),m:m,g:G[W.g].k});
+  if(W.d!=null&&S.hechos.indexOf(W.d)<0)S.hechos.push(W.d);
+  save();say("Terminaste. Buen trabajo.");
+  $("play").className="";W=null;draw();alert("¡Listo! Terminaste el entrenamiento.");
+}
+$("pausa").onclick=function(){W.pause=!W.pause;this.textContent=W.pause?"Seguir":"Pausa"};
+$("salta").onclick=function(){next()};
+$("salir").onclick=function(){if(confirm("¿Salir del entrenamiento?")){clearInterval(T);W=null;$("play").className="";try{speechSynthesis.cancel()}catch(e){}}};
+draw();
+</script>
+</body>
+</html>
